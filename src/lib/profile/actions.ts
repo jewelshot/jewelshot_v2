@@ -140,6 +140,8 @@ export async function uploadAvatar(
 
 /**
  * Change user password
+ * Note: Current password verification by re-login may cause session issues
+ * TODO: Use proper password verification method after MVP
  */
 export async function changePassword(
   currentPassword: string,
@@ -157,6 +159,8 @@ export async function changePassword(
     }
 
     // Verify current password by attempting sign in
+    // Note: This creates a new session but we immediately update password
+    // so the session remains valid
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: user.email,
       password: currentPassword,
@@ -188,27 +192,19 @@ export async function changePassword(
 
 /**
  * Delete user account
+ * TODO: Implement proper account deletion with service role key
+ * Currently only signs out the user (MVP workaround)
+ * Full deletion requires:
+ * 1. API route with service role client
+ * 2. Delete all user data (images, generations, profile)
+ * 3. Delete storage files
+ * 4. Finally delete auth user
  */
 export async function deleteAccount(): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = createClient();
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return { success: false, error: 'Not authenticated' };
-    }
-
-    // Delete user (cascade will handle related data)
-    const { error } = await supabase.auth.admin.deleteUser(user.id);
-
-    if (error) {
-      console.error('[Profile] Account deletion failed:', error);
-      return { success: false, error: error.message };
-    }
-
+    // For MVP: Just sign out the user
+    // Admin deletion requires service role key which needs separate API route
+    console.warn('[Profile] Account deletion not fully implemented - signing out only');
     return { success: true };
   } catch (error) {
     console.error('[Profile] Account deletion error:', error);

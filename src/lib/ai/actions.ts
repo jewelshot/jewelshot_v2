@@ -59,7 +59,10 @@ export async function generateAIImage(formData: FormData): Promise<GenerateResul
     const userId = user?.id;
 
     // Rate limiting (10 generations per hour)
-    if (userId) {
+    // TODO: Implement database-backed rate limiting for serverless (Vercel)
+    // Current in-memory implementation won't work across lambda instances
+    // Temporarily disabled for MVP launch - will implement with Supabase after launch
+    /* if (userId) {
       const rateLimit = checkRateLimit(userId, { max: 10, windowMs: 60 * 60 * 1000 });
       if (!rateLimit.allowed) {
         const resetIn = Math.ceil((rateLimit.resetAt - Date.now()) / 60000);
@@ -68,7 +71,7 @@ export async function generateAIImage(formData: FormData): Promise<GenerateResul
           error: `Rate limit exceeded. Please try again in ${resetIn} minutes.`,
         };
       }
-    }
+    } */
 
     // Step 1: Upload original image to Supabase Storage
     console.log('[AI] Uploading original image...');
