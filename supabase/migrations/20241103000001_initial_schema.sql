@@ -397,3 +397,4 @@ COMMENT ON COLUMN public.images.source_type IS 'How the image was created: uploa
 COMMENT ON COLUMN public.projects.canvas_state IS 'Serialized canvas state (filters, transforms, etc.)';
 COMMENT ON COLUMN public.ai_generations.parameters IS 'Mode-specific parameters as JSON';
 
+

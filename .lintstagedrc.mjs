@@ -3,3 +3,4 @@ export default {
   '*.{json,md,css,scss}': ['prettier --write'],
 };
 
+

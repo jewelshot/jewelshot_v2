@@ -1,7 +1,6 @@
 /**
  * Quick Mode Panel (Molecule)
- * Preset-based AI generation
- * Uses existing preset system from jewelshot v1
+ * Preset-based AI generation with real FAL.AI integration
  */
 
 'use client';
@@ -9,6 +8,8 @@
 import { useState } from 'react';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { Button } from '@/components/atoms/Button';
+import { generateAIImage } from '@/lib/ai/actions';
+import { buildQuickPrompt } from '@/lib/ai/prompts';
 
 const presets = [
   { id: 'white-background', name: 'White Background', icon: '⚪', description: 'Clean e-commerce' },
@@ -32,21 +33,61 @@ const genders = [
 ];
 
 export function QuickModePanel() {
-  const { setIsGenerating, setGeneratedImageUrl, canvasImageUrl } = useCanvasStore();
+  const { setIsGenerating, setGeneratedImageUrl, uploadedImage } = useCanvasStore();
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [jewelryType, setJewelryType] = useState('ring');
   const [gender, setGender] = useState('women');
+  const [error, setError] = useState<string | null>(null);
 
   const handleGenerate = async () => {
-    if (!canvasImageUrl || !selectedPreset) return;
+    if (!uploadedImage || !selectedPreset) return;
 
     setIsGenerating(true);
+    setError(null);
 
-    // Simulate AI generation (MVP - replace with actual API call)
-    setTimeout(() => {
-      setGeneratedImageUrl(canvasImageUrl); // Mock: same image for now
+    try {
+      // Build prompt
+      const { prompt, negativePrompt } = buildQuickPrompt({
+        jewelryType,
+        gender,
+        presetId: selectedPreset,
+        aspectRatio: '9:16',
+      });
+
+      // Create FormData
+      const formData = new FormData();
+      formData.append('file', uploadedImage);
+      formData.append('prompt', prompt);
+      formData.append('negativePrompt', negativePrompt);
+      formData.append('mode', 'quick');
+      formData.append('presetId', selectedPreset);
+      formData.append('strength', '0.75');
+      formData.append('guidanceScale', '7.5');
+      formData.append(
+        'metadata',
+        JSON.stringify({
+          jewelryType,
+          gender,
+          presetId: selectedPreset,
+        })
+      );
+
+      // Generate image
+      const result = await generateAIImage(formData);
+
+      if (result.success && result.imageUrl) {
+        setGeneratedImageUrl(result.imageUrl);
+      } else {
+        setError(result.error || 'Generation failed');
+        console.error('[Quick Mode] Generation failed:', result.error);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      setError(message);
+      console.error('[Quick Mode] Error:', err);
+    } finally {
       setIsGenerating(false);
-    }, 3000);
+    }
   };
 
   return (
@@ -118,13 +159,20 @@ export function QuickModePanel() {
         </div>
       </div>
 
+      {/* Error Display */}
+      {error && (
+        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4">
+          <p className="text-sm text-red-300">❌ {error}</p>
+        </div>
+      )}
+
       {/* Generate Button */}
       <Button
         variant="primary"
         size="lg"
         fullWidth
         onClick={handleGenerate}
-        disabled={!canvasImageUrl || !selectedPreset}
+        disabled={!uploadedImage || !selectedPreset}
       >
         🎨 Generate Photo
       </Button>
