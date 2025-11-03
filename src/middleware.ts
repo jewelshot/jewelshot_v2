@@ -8,7 +8,8 @@ import type { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
 // Routes that require authentication
-const protectedRoutes = ['/studio', '/gallery', '/settings', '/billing'];
+// TODO: Re-enable /studio protection after UI development
+const protectedRoutes = ['/gallery', '/settings', '/billing']; // '/studio' temporarily disabled for development
 
 // Routes that should redirect to studio if already authenticated
 const authRoutes = ['/login', '/signup'];
