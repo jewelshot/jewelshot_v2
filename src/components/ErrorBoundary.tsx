@@ -33,7 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
     // TODO: Send to error tracking service (Sentry)
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;
