@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/server';
 
 // Routes that require authentication
 // TODO: Re-enable /studio protection after UI development
-const protectedRoutes = ['/gallery', '/settings', '/billing']; // '/studio' temporarily disabled for development
+const protectedRoutes = ['/studio', '/gallery', '/settings', '/billing']; // Studio re-enabled for gallery testing
 
 // Routes that should redirect to studio if already authenticated
 const authRoutes = ['/login', '/signup'];
