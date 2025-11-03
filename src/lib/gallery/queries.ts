@@ -44,7 +44,7 @@ export async function getGalleryImages(
   filters: GalleryFilters = {}
 ): Promise<{ success: boolean; data?: GalleryImage[]; error?: string; count?: number }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Get current user
     const {
@@ -110,7 +110,7 @@ export async function getGalleryImages(
 
     return {
       success: true,
-      data: data as GalleryImage[],
+      data: data as unknown as GalleryImage[],
       count: count || 0,
     };
   } catch (error) {
@@ -129,7 +129,7 @@ export async function getImageById(
   imageId: string
 ): Promise<{ success: boolean; data?: GalleryImage; error?: string }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {
       data: { user },
@@ -165,7 +165,7 @@ export async function getImageById(
       return { success: false, error: error.message };
     }
 
-    return { success: true, data: data as GalleryImage };
+    return { success: true, data: data as unknown as GalleryImage };
   } catch (error) {
     console.error('[Gallery] Query error:', error);
     return {
@@ -180,7 +180,7 @@ export async function getImageById(
  */
 export async function deleteImage(imageId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {
       data: { user },
@@ -215,12 +215,12 @@ export async function deleteImage(imageId: string): Promise<{ success: boolean; 
     }
 
     // Delete from storage
-    if (image.storage_path) {
-      await supabase.storage.from('images').remove([image.storage_path]);
+    if ((image as any).storage_path) {
+      await supabase.storage.from('images').remove([(image as any).storage_path]);
     }
 
     // Delete original if path exists in metadata
-    const originalPath = (image.metadata as Record<string, unknown>)?.originalPath;
+    const originalPath = ((image as any).metadata as Record<string, unknown>)?.originalPath;
     if (originalPath && typeof originalPath === 'string') {
       await supabase.storage.from('images').remove([originalPath]);
     }
@@ -248,7 +248,7 @@ export async function getGalleryStats(): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {
       data: { user },
@@ -282,7 +282,7 @@ export async function getGalleryStats(): Promise<{
       data: {
         totalImages: imagesCount || 0,
         totalGenerations: generationsCount || 0,
-        storageUsed: profile?.storage_used || 0,
+        storageUsed: (profile as any)?.storage_used || 0,
       },
     };
   } catch (error) {

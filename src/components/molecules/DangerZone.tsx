@@ -94,7 +94,7 @@ export function DangerZone() {
               fullWidth
               onClick={handleDeleteAccount}
               disabled={deleteConfirmText !== 'DELETE' || isDeleting}
-              loading={isDeleting}
+              isLoading={isDeleting}
             >
               Permanently Delete
             </Button>

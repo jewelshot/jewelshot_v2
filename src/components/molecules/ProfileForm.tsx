@@ -72,7 +72,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
       )}
 
       {/* Submit Button */}
-      <Button type="submit" variant="primary" size="lg" fullWidth loading={isLoading}>
+      <Button type="submit" variant="primary" size="lg" fullWidth isLoading={isLoading}>
         Save Changes
       </Button>
     </form>

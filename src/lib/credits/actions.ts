@@ -42,8 +42,8 @@ export async function getUserCredits(): Promise<ActionResult<{ credits: number; 
     return {
       success: true,
       data: {
-        credits: data.credits || 0,
-        plan: data.plan || 'free',
+        credits: (data as any).credits || 0,
+        plan: (data as any).plan || 'free',
       },
     };
   } catch (error) {
@@ -70,7 +70,7 @@ export async function deductCredit(): Promise<ActionResult<{ remainingCredits: n
     }
 
     // Call the database function
-    const { data, error } = await supabase.rpc('deduct_credit', {
+    const { data, error } = await (supabase.rpc as any)('deduct_credit', {
       user_id: user.id,
     });
 
@@ -117,7 +117,7 @@ export async function addCredits(amount: number): Promise<ActionResult<{ newBala
     }
 
     // Call the database function
-    const { data, error } = await supabase.rpc('add_credits', {
+    const { data, error } = await (supabase.rpc as any)('add_credits', {
       user_id: user.id,
       amount,
     });
@@ -161,7 +161,7 @@ export async function hasAvailableCredits(): Promise<ActionResult<{ hasCredits: 
       return { success: false, error: 'Not authenticated' };
     }
 
-    const { data, error } = await supabase.rpc('has_credits', {
+    const { data, error } = await (supabase.rpc as any)('has_credits', {
       user_id: user.id,
     });
 

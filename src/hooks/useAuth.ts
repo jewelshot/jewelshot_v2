@@ -12,7 +12,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 
 export function useAuth() {
   const router = useRouter();
-  const { user, session, isLoading, setSession, logout: storeLogout } = useAuthStore();
+  const { user, isLoading, setUser, clearUser } = useAuthStore();
 
   // Initialize auth state
   useEffect(() => {
@@ -20,33 +20,38 @@ export function useAuth() {
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+      if (session?.user) {
+        setUser(session.user as any);
+      }
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+      if (session?.user) {
+        setUser(session.user as any);
+      } else {
+        clearUser();
+      }
       router.refresh();
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [router, setSession]);
+  }, [router, setUser, clearUser]);
 
   const logout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    storeLogout();
+    clearUser();
     router.push('/login');
     router.refresh();
   };
 
   return {
     user,
-    session,
     isLoading,
     isAuthenticated: !!user,
     logout,

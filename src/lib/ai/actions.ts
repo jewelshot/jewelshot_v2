@@ -156,8 +156,8 @@ export async function generateAIImage(formData: FormData): Promise<GenerateResul
           metadata: {
             originalPath: uploadResult.path,
             ...metadata,
-          },
-        })
+          } as any,
+        } as any)
         .select()
         .single();
 
@@ -171,7 +171,7 @@ export async function generateAIImage(formData: FormData): Promise<GenerateResul
           .from('ai_generations')
           .insert({
             user_id: userId,
-            image_id: imageRecord.id,
+            image_id: (imageRecord as any).id,
             model_name: 'flux-pro/v1.1-ultra',
             prompt,
             negative_prompt: negativePrompt,
@@ -181,15 +181,15 @@ export async function generateAIImage(formData: FormData): Promise<GenerateResul
               seed: generation.seed,
               mode,
               presetId,
-            },
+            } as any,
             status: 'completed',
             inference_time: generation.timings.inference,
-          })
+          } as any)
           .select()
           .single();
 
         if (genRecord) {
-          generationId = genRecord.id;
+          generationId = (genRecord as any).id;
         }
       }
     }
@@ -219,7 +219,7 @@ export async function generateAIImage(formData: FormData): Promise<GenerateResul
  */
 export async function getGenerationHistory(limit: number = 10) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {
       data: { user },

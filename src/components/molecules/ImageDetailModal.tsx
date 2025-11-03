@@ -123,7 +123,7 @@ export function ImageDetailModal({ image, onClose, onDelete, onDownload }: Image
                       <span className="text-gray-400">Mode:</span>
                       <span className="text-white">
                         {generation.parameters
-                          ? (generation.parameters as Record<string, unknown>).mode
+                          ? String((generation.parameters as Record<string, unknown>).mode || 'N/A')
                           : 'N/A'}
                       </span>
                     </div>

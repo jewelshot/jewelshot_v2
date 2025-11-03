@@ -20,7 +20,7 @@ export async function updateProfile(
   data: UpdateProfileData
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {
       data: { user },
@@ -62,7 +62,7 @@ export async function uploadAvatar(
   formData: FormData
 ): Promise<{ success: boolean; avatarUrl?: string; error?: string }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {
       data: { user },
@@ -155,7 +155,7 @@ export async function changePassword(
   newPassword: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {
       data: { user },
@@ -246,6 +246,7 @@ export async function getUserProfile(): Promise<{
     email: string;
     full_name: string | null;
     avatar_url: string | null;
+    credits: number;
     storage_used: number;
     ai_generation_count: number;
     created_at: string;
@@ -253,7 +254,7 @@ export async function getUserProfile(): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {
       data: { user },
@@ -274,16 +275,18 @@ export async function getUserProfile(): Promise<{
       return { success: false, error: error.message };
     }
 
+    const p = profile as any;
     return {
       success: true,
       data: {
-        id: profile.id,
+        id: p.id,
         email: user.email || '',
-        full_name: profile.full_name,
-        avatar_url: profile.avatar_url,
-        storage_used: profile.storage_used,
-        ai_generation_count: profile.ai_generation_count,
-        created_at: profile.created_at,
+        full_name: p.full_name,
+        avatar_url: p.avatar_url,
+        credits: p.credits || 0,
+        storage_used: p.storage_used,
+        ai_generation_count: p.ai_generation_count,
+        created_at: p.created_at,
       },
     };
   } catch (error) {

@@ -24,7 +24,7 @@ export async function getProfile(userId: string) {
   const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
 
   if (error) throw error;
-  return data as Profile;
+  return data as any as Profile;
 }
 
 export async function updateProfile(userId: string, updates: ProfileUpdate) {
@@ -37,7 +37,7 @@ export async function updateProfile(userId: string, updates: ProfileUpdate) {
     .single();
 
   if (error) throw error;
-  return data as Profile;
+  return data as any as Profile;
 }
 
 // =====================================================
@@ -54,7 +54,7 @@ export async function getUserImages(userId: string, limit = 50) {
     .limit(limit);
 
   if (error) throw error;
-  return data as Image[];
+  return data as any as Image[];
 }
 
 export async function getImage(imageId: string) {
@@ -62,7 +62,7 @@ export async function getImage(imageId: string) {
   const { data, error } = await supabase.from('images').select('*').eq('id', imageId).single();
 
   if (error) throw error;
-  return data as Image;
+  return data as any as Image;
 }
 
 export async function createImage(image: ImageInsert) {
@@ -70,7 +70,7 @@ export async function createImage(image: ImageInsert) {
   const { data, error } = await supabase.from('images').insert(image).select().single();
 
   if (error) throw error;
-  return data as Image;
+  return data as any as Image;
 }
 
 export async function deleteImage(imageId: string) {
@@ -90,7 +90,7 @@ export async function toggleFavorite(imageId: string, isFavorite: boolean) {
     .single();
 
   if (error) throw error;
-  return data as Image;
+  return data as any as Image;
 }
 
 // =====================================================
@@ -106,7 +106,7 @@ export async function getUserProjects(userId: string) {
     .order('updated_at', { ascending: false });
 
   if (error) throw error;
-  return data as Project[];
+  return data as any as Project[];
 }
 
 export async function getProject(projectId: string) {
@@ -114,7 +114,7 @@ export async function getProject(projectId: string) {
   const { data, error } = await supabase.from('projects').select('*').eq('id', projectId).single();
 
   if (error) throw error;
-  return data as Project;
+  return data as any as Project;
 }
 
 export async function createProject(project: ProjectInsert) {
@@ -122,7 +122,7 @@ export async function createProject(project: ProjectInsert) {
   const { data, error } = await supabase.from('projects').insert(project).select().single();
 
   if (error) throw error;
-  return data as Project;
+  return data as any as Project;
 }
 
 export async function updateProject(projectId: string, updates: Partial<Project>) {
@@ -135,7 +135,7 @@ export async function updateProject(projectId: string, updates: Partial<Project>
     .single();
 
   if (error) throw error;
-  return data as Project;
+  return data as any as Project;
 }
 
 export async function deleteProject(projectId: string) {
@@ -159,7 +159,7 @@ export async function getUserGenerations(userId: string, limit = 50) {
     .limit(limit);
 
   if (error) throw error;
-  return data as AIGeneration[];
+  return data as any as AIGeneration[];
 }
 
 export async function getGeneration(generationId: string) {
@@ -171,7 +171,7 @@ export async function getGeneration(generationId: string) {
     .single();
 
   if (error) throw error;
-  return data as AIGeneration;
+  return data as any as AIGeneration;
 }
 
 export async function createGeneration(generation: AIGenerationInsert) {
@@ -183,7 +183,7 @@ export async function createGeneration(generation: AIGenerationInsert) {
     .single();
 
   if (error) throw error;
-  return data as AIGeneration;
+  return data as any as AIGeneration;
 }
 
 export async function updateGenerationStatus(
@@ -211,7 +211,7 @@ export async function updateGenerationStatus(
     .single();
 
   if (error) throw error;
-  return data as AIGeneration;
+  return data as any as AIGeneration;
 }
 
 // =====================================================

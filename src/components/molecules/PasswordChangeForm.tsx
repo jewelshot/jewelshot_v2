@@ -103,7 +103,7 @@ export function PasswordChangeForm() {
       )}
 
       {/* Submit Button */}
-      <Button type="submit" variant="primary" size="lg" fullWidth loading={isLoading}>
+      <Button type="submit" variant="primary" size="lg" fullWidth isLoading={isLoading}>
         Change Password
       </Button>
     </form>

@@ -108,7 +108,7 @@ export async function deleteImageFromStorage(
   bucket: string = 'images'
 ): Promise<void> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const { error } = await supabase.storage.from(bucket).remove([path]);
 

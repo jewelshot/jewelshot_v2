@@ -144,7 +144,7 @@ OUTPUT: Macro detail photo, Aspect ratio ${aspectRatio}
     `.trim(),
   };
 
-  const prompt = presets[presetId || 'white-background'] || presets['white-background'];
+  const prompt = presets[presetId || 'white-background'] || presets['white-background'] || '';
 
   return {
     prompt,

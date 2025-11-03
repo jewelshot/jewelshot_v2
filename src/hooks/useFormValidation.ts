@@ -74,7 +74,7 @@ export function useFormValidation<T extends Record<string, string>>(
   const handleBlur = (name: keyof T) => {
     setTouched((prev) => ({ ...prev, [name as string]: true }));
 
-    const error = validateField(name as string, values[name]);
+    const error = validateField(name as string, (values[name] as string) || '');
     if (error) {
       setErrors((prev) => ({ ...prev, [name as string]: error }));
     }
@@ -84,7 +84,7 @@ export function useFormValidation<T extends Record<string, string>>(
     const newErrors: ValidationErrors = {};
 
     Object.keys(validationRules).forEach((fieldName) => {
-      const error = validateField(fieldName, values[fieldName as keyof T]);
+      const error = validateField(fieldName, (values[fieldName as keyof T] as string) || '');
       if (error) {
         newErrors[fieldName] = error;
       }
