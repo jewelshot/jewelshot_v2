@@ -9,6 +9,7 @@ import { generateImage } from '@/lib/fal/client';
 import { uploadImageToStorage } from '@/lib/storage/upload';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export interface GenerateOptions {
   prompt: string;
@@ -56,6 +57,18 @@ export async function generateAIImage(formData: FormData): Promise<GenerateResul
       data: { user },
     } = await supabase.auth.getUser();
     const userId = user?.id;
+
+    // Rate limiting (10 generations per hour)
+    if (userId) {
+      const rateLimit = checkRateLimit(userId, { max: 10, windowMs: 60 * 60 * 1000 });
+      if (!rateLimit.allowed) {
+        const resetIn = Math.ceil((rateLimit.resetAt - Date.now()) / 60000);
+        return {
+          success: false,
+          error: `Rate limit exceeded. Please try again in ${resetIn} minutes.`,
+        };
+      }
+    }
 
     // Step 1: Upload original image to Supabase Storage
     console.log('[AI] Uploading original image...');
