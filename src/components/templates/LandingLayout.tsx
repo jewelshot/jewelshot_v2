@@ -14,11 +14,11 @@ interface LandingLayoutProps {
 
 export function LandingLayout({ children }: LandingLayoutProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A0A0B] via-purple-950/20 to-[#0A0A0B]">
+    <div className="min-h-screen bg-[#0A0A0B]">
       {/* Background decorations */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-48 h-96 w-96 rounded-full bg-purple-500/10 blur-3xl" />
-        <div className="absolute bottom-1/4 -right-48 h-96 w-96 rounded-full bg-pink-500/10 blur-3xl" />
+        <div className="absolute top-1/4 -left-48 h-96 w-96 rounded-full bg-purple-500/20 blur-3xl" />
+        <div className="absolute bottom-1/4 -right-48 h-96 w-96 rounded-full bg-pink-500/20 blur-3xl" />
       </div>
 
       {/* Content */}

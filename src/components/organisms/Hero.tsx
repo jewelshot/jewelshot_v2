@@ -13,8 +13,8 @@ export function Hero() {
     <section className="relative overflow-hidden py-20 md:py-32">
       {/* Animated background blobs */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute left-1/4 top-1/4 h-96 w-96 animate-pulse rounded-full bg-purple-500/10 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 h-96 w-96 animate-pulse rounded-full bg-pink-500/10 blur-3xl [animation-delay:1s]" />
+        <div className="absolute left-1/4 top-1/4 h-96 w-96 animate-pulse rounded-full bg-purple-500/30 blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 h-96 w-96 animate-pulse rounded-full bg-pink-500/30 blur-3xl [animation-delay:1s]" />
       </div>
 
       <div className="container mx-auto px-4">

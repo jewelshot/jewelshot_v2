@@ -41,8 +41,8 @@ export function PricingCard({
       <div
         className={`relative rounded-2xl border p-8 ${
           popular
-            ? 'border-purple-500/50 bg-gradient-to-br from-purple-500/10 to-pink-500/10'
-            : 'border-white/10 bg-white/5'
+            ? 'border-purple-500/50 bg-gradient-to-br from-purple-500/20 to-pink-500/20'
+            : 'border-white/10 bg-white/[0.03]'
         }`}
       >
         {/* Header */}

@@ -15,7 +15,7 @@ export function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
     <div className="group relative">
       {/* Card */}
-      <div className="relative rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm transition-all duration-300 hover:border-purple-500/30 hover:bg-white/[0.07]">
+      <div className="relative rounded-2xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-sm transition-all duration-300 hover:border-purple-500/50 hover:bg-white/[0.05]">
         {/* Icon */}
         <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 text-2xl transition-transform duration-300 group-hover:scale-110">
           {icon}

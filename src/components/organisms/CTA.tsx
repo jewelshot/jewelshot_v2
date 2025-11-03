@@ -11,10 +11,10 @@ export function CTA() {
   return (
     <section className="py-20">
       <div className="container mx-auto px-4">
-        <div className="relative overflow-hidden rounded-3xl border border-purple-500/20 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-purple-500/10 p-12 backdrop-blur-sm md:p-20">
+        <div className="relative overflow-hidden rounded-3xl border border-purple-500/30 bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-purple-500/20 p-12 backdrop-blur-sm md:p-20">
           {/* Background decoration */}
-          <div className="absolute right-0 top-0 h-64 w-64 -translate-y-1/2 translate-x-1/2 rounded-full bg-purple-500/20 blur-3xl" />
-          <div className="absolute bottom-0 left-0 h-64 w-64 translate-x-1/2 translate-y-1/2 rounded-full bg-pink-500/20 blur-3xl" />
+          <div className="absolute right-0 top-0 h-64 w-64 -translate-y-1/2 translate-x-1/2 rounded-full bg-purple-500/40 blur-3xl" />
+          <div className="absolute bottom-0 left-0 h-64 w-64 translate-x-1/2 translate-y-1/2 rounded-full bg-pink-500/40 blur-3xl" />
 
           {/* Content */}
           <div className="relative text-center">

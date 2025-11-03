@@ -28,7 +28,7 @@ export function HowItWorks() {
     <section className="relative py-20 md:py-32">
       {/* Background decoration */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute left-0 top-1/2 h-px w-full bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
+        <div className="absolute left-0 top-1/2 h-px w-full bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
       </div>
 
       <div className="container mx-auto px-4">

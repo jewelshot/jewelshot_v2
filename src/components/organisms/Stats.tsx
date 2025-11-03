@@ -16,7 +16,7 @@ export function Stats() {
   return (
     <section className="py-20">
       <div className="container mx-auto px-4">
-        <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] p-12 backdrop-blur-sm md:p-16">
+        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-12 backdrop-blur-sm md:p-16">
           <div className="mb-12 text-center">
             <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
               Trusted by Jewelry Businesses Worldwide
