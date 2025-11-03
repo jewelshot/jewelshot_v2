@@ -14,6 +14,7 @@ export interface UploadResult {
 /**
  * Upload image file to Supabase Storage
  * Returns public URL for the uploaded file
+ * Enforces storage limits (1GB for free plan)
  */
 export async function uploadImageToStorage(
   file: File,
@@ -21,7 +22,49 @@ export async function uploadImageToStorage(
   userId?: string
 ): Promise<UploadResult> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
+
+    // Storage limit enforcement (1GB = 1073741824 bytes)
+    const STORAGE_LIMIT = 1073741824; // 1GB in bytes
+
+    if (userId) {
+      // Get user's current storage usage
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('storage_used')
+        .eq('id', userId)
+        .single();
+
+      if (profileError) {
+        console.error('[Storage] Failed to check storage:', profileError);
+        // Continue anyway - don't block upload on profile fetch error
+      } else if (profile) {
+        const currentUsage = profile.storage_used || 0;
+        const newUsage = currentUsage + file.size;
+
+        // Check if upload would exceed limit
+        if (newUsage > STORAGE_LIMIT) {
+          const usedGB = (currentUsage / 1073741824).toFixed(2);
+          const limitGB = (STORAGE_LIMIT / 1073741824).toFixed(2);
+          throw new Error(
+            `Storage limit exceeded. You've used ${usedGB}GB of ${limitGB}GB. Please delete some images or upgrade your plan.`
+          );
+        }
+      }
+    }
+
+    // Validate file size (max 10MB per file)
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    if (file.size > MAX_FILE_SIZE) {
+      const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+      throw new Error(`File too large (${sizeMB}MB). Maximum file size is 10MB.`);
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error(`Invalid file type: ${file.type}. Only JPEG, PNG, and WebP are allowed.`);
+    }
 
     // Generate unique filename
     const timestamp = Date.now();

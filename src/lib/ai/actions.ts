@@ -9,7 +9,7 @@ import { generateImage } from '@/lib/fal/client';
 import { uploadImageToStorage } from '@/lib/storage/upload';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { hasAvailableCredits, deductCredit } from '@/lib/credits/actions';
 
 export interface GenerateOptions {
   prompt: string;
@@ -50,35 +50,36 @@ export async function generateAIImage(formData: FormData): Promise<GenerateResul
       return { success: false, error: 'No prompt provided' };
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
-    // Get current user (optional for MVP)
+    // Get current user (required for credit system)
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    const userId = user?.id;
 
-    // Rate limiting (10 generations per hour)
-    // TODO: Implement database-backed rate limiting for serverless (Vercel)
-    // Current in-memory implementation won't work across lambda instances
-    // Temporarily disabled for MVP launch - will implement with Supabase after launch
-    /* if (userId) {
-      const rateLimit = checkRateLimit(userId, { max: 10, windowMs: 60 * 60 * 1000 });
-      if (!rateLimit.allowed) {
-        const resetIn = Math.ceil((rateLimit.resetAt - Date.now()) / 60000);
-        return {
-          success: false,
-          error: `Rate limit exceeded. Please try again in ${resetIn} minutes.`,
-        };
-      }
-    } */
+    if (!user) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    const userId = user.id;
+
+    // Check if user has available credits
+    const creditCheck = await hasAvailableCredits();
+    if (!creditCheck.success) {
+      return { success: false, error: creditCheck.error || 'Failed to check credits' };
+    }
+
+    if (!creditCheck.data?.hasCredits) {
+      return {
+        success: false,
+        error: 'Insufficient credits. Please purchase more credits to continue.',
+      };
+    }
 
     // Step 1: Upload original image to Supabase Storage
-    console.log('[AI] Uploading original image...');
     const uploadResult = await uploadImageToStorage(file, 'images', userId);
 
     // Step 2: Generate AI image using FAL.AI
-    console.log('[AI] Generating AI image...');
     const generation = await generateImage({
       imageUrl: uploadResult.url,
       prompt,
@@ -94,7 +95,6 @@ export async function generateAIImage(formData: FormData): Promise<GenerateResul
     }
 
     // Step 3: Download generated image and upload to Supabase
-    console.log('[AI] Saving generated image...');
     const generatedImageResponse = await fetch(generatedImageUrl);
     const generatedImageBlob = await generatedImageResponse.blob();
     const generatedFile = new File([generatedImageBlob], 'generated.png', {
@@ -103,9 +103,16 @@ export async function generateAIImage(formData: FormData): Promise<GenerateResul
 
     const generatedUploadResult = await uploadImageToStorage(generatedFile, 'images', userId);
 
-    // Step 4: Save to database (if user is logged in)
+    // Step 4: Deduct credit (do this AFTER successful generation)
+    const creditDeduction = await deductCredit();
+    if (!creditDeduction.success) {
+      console.error('[AI] Failed to deduct credit:', creditDeduction.error);
+      // Continue anyway - user already got the image, we don't want to fail here
+    }
+
+    // Step 5: Save to database
     let generationId: string | undefined;
-    if (userId) {
+    if (true) {
       const { data: imageRecord, error: imageError } = await supabase
         .from('images')
         .insert({
@@ -162,7 +169,6 @@ export async function generateAIImage(formData: FormData): Promise<GenerateResul
       revalidatePath('/gallery');
     }
 
-    console.log('[AI] ✅ Generation successful!');
     return {
       success: true,
       imageUrl: generatedUploadResult.url,

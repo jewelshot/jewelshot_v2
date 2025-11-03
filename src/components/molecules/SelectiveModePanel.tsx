@@ -6,7 +6,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useCanvasStore } from '@/store/useCanvasStore';
+import { useCredits } from '@/hooks/useCredits';
 import { Button } from '@/components/atoms/Button';
 import { generateAIImage } from '@/lib/ai/actions';
 import { buildSelectivePrompt } from '@/lib/ai/prompts';
@@ -37,6 +39,7 @@ const genders = ['women', 'men'];
 
 export function SelectiveModePanel() {
   const { setIsGenerating, setGeneratedImageUrl, uploadedImage } = useCanvasStore();
+  const { credits, hasCredits, refreshCredits } = useCredits();
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
@@ -85,6 +88,7 @@ export function SelectiveModePanel() {
 
       if (result.success && result.imageUrl) {
         setGeneratedImageUrl(result.imageUrl);
+        await refreshCredits();
       } else {
         setError(result.error || 'Generation failed');
         console.error('[Selective Mode] Generation failed:', result.error);
@@ -204,18 +208,39 @@ export function SelectiveModePanel() {
         </div>
       )}
 
+      {/* Credits Warning */}
+      {!hasCredits && (
+        <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4">
+          <p className="mb-2 text-sm font-semibold text-yellow-300">⚠️ No Credits Available</p>
+          <p className="mb-3 text-xs text-gray-300">
+            You&apos;ve used all your credits. Purchase more to continue.
+          </p>
+          <Link href="/pricing">
+            <Button variant="primary" size="sm" fullWidth>
+              Buy Credits
+            </Button>
+          </Link>
+        </div>
+      )}
+
       {/* Generate Button */}
       <Button
         variant="primary"
         size="lg"
         fullWidth
         onClick={handleGenerate}
-        disabled={!canGenerate}
+        disabled={!canGenerate || !hasCredits}
       >
-        🎨 Generate Custom Style
+        {hasCredits ? '🎨 Generate Custom Style' : '⚠️ No Credits'}
       </Button>
 
-      {!canGenerate && uploadedImage && (
+      {hasCredits && (
+        <p className="text-center text-xs text-gray-400">
+          {credits} credit{credits !== 1 ? 's' : ''} remaining
+        </p>
+      )}
+
+      {!canGenerate && uploadedImage && hasCredits && (
         <p className="text-center text-xs text-gray-500">
           Select model, location, and mood to generate
         </p>

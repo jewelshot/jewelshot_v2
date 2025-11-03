@@ -6,8 +6,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { getUserProfile, uploadAvatar } from '@/lib/profile/actions';
+import { AppHeader } from '@/components/organisms/AppHeader';
 import { Avatar } from '@/components/atoms/Avatar';
 import { ProfileForm } from '@/components/molecules/ProfileForm';
 import { PasswordChangeForm } from '@/components/molecules/PasswordChangeForm';
@@ -80,42 +80,7 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0B]">
-      {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0A0A0B]/95 backdrop-blur-xl">
-        <div className="mx-auto max-w-6xl px-6 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-white transition-opacity hover:opacity-80"
-            >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-pink-600">
-                <span className="text-lg font-bold">💎</span>
-              </div>
-              <span className="text-lg font-bold">Jewelshot</span>
-            </Link>
-
-            {/* Nav */}
-            <nav className="flex items-center gap-6">
-              <Link
-                href="/studio"
-                className="text-sm text-gray-400 transition-colors hover:text-white"
-              >
-                Studio
-              </Link>
-              <Link
-                href="/gallery"
-                className="text-sm text-gray-400 transition-colors hover:text-white"
-              >
-                Gallery
-              </Link>
-              <Link href="/settings" className="text-sm font-medium text-purple-400">
-                Settings
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <AppHeader />
 
       {/* Main Content */}
       <main className="mx-auto max-w-6xl px-6 py-12">

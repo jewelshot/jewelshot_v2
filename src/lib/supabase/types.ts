@@ -20,6 +20,8 @@ export interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   subscription_tier: SubscriptionTier;
+  credits: number; // AI generation credits
+  plan: 'free' | 'pro' | 'business'; // Subscription plan
   images_count: number;
   ai_generations_count: number;
   storage_used_bytes: number;

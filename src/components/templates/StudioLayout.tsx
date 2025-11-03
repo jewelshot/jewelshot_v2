@@ -3,7 +3,9 @@
  * Main studio interface structure
  */
 
-import { StudioTopBar } from '@/components/organisms/StudioTopBar';
+'use client';
+
+import { AppHeader } from '@/components/organisms/AppHeader';
 import { StudioLeftSidebar } from '@/components/organisms/StudioLeftSidebar';
 import { StudioRightSidebar } from '@/components/organisms/StudioRightSidebar';
 import { Canvas } from '@/components/organisms/Canvas';
@@ -11,8 +13,8 @@ import { Canvas } from '@/components/organisms/Canvas';
 export function StudioLayout() {
   return (
     <div className="flex h-screen flex-col bg-[#0A0A0B]">
-      {/* Top Bar */}
-      <StudioTopBar />
+      {/* Unified Header */}
+      <AppHeader />
 
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">

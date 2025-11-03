@@ -6,7 +6,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useCanvasStore } from '@/store/useCanvasStore';
+import { useCredits } from '@/hooks/useCredits';
 import { Button } from '@/components/atoms/Button';
 import { generateAIImage } from '@/lib/ai/actions';
 import { buildQuickPrompt } from '@/lib/ai/prompts';
@@ -34,6 +36,7 @@ const genders = [
 
 export function QuickModePanel() {
   const { setIsGenerating, setGeneratedImageUrl, uploadedImage } = useCanvasStore();
+  const { credits, hasCredits, refreshCredits } = useCredits();
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [jewelryType, setJewelryType] = useState('ring');
   const [gender, setGender] = useState('women');
@@ -77,6 +80,8 @@ export function QuickModePanel() {
 
       if (result.success && result.imageUrl) {
         setGeneratedImageUrl(result.imageUrl);
+        // Refresh credits after successful generation
+        await refreshCredits();
       } else {
         setError(result.error || 'Generation failed');
         console.error('[Quick Mode] Generation failed:', result.error);
@@ -166,16 +171,39 @@ export function QuickModePanel() {
         </div>
       )}
 
+      {/* Credits Warning */}
+      {!hasCredits && (
+        <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4">
+          <p className="mb-2 text-sm font-semibold text-yellow-300">⚠️ No Credits Available</p>
+          <p className="mb-3 text-xs text-gray-300">
+            You&apos;ve used all {credits === 0 ? 'your' : 'available'} credits. Purchase more to
+            continue generating images.
+          </p>
+          <Link href="/pricing">
+            <Button variant="primary" size="sm" fullWidth>
+              Buy Credits
+            </Button>
+          </Link>
+        </div>
+      )}
+
       {/* Generate Button */}
       <Button
         variant="primary"
         size="lg"
         fullWidth
         onClick={handleGenerate}
-        disabled={!uploadedImage || !selectedPreset}
+        disabled={!uploadedImage || !selectedPreset || !hasCredits}
       >
-        🎨 Generate Photo
+        {hasCredits ? '🎨 Generate Photo' : '⚠️ No Credits'}
       </Button>
+
+      {/* Credits Display */}
+      {hasCredits && (
+        <p className="text-center text-xs text-gray-400">
+          {credits} credit{credits !== 1 ? 's' : ''} remaining
+        </p>
+      )}
     </div>
   );
 }

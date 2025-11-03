@@ -6,7 +6,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useCanvasStore } from '@/store/useCanvasStore';
+import { useCredits } from '@/hooks/useCredits';
 import { Button } from '@/components/atoms/Button';
 import { Slider } from '@/components/atoms/Slider';
 import { generateAIImage } from '@/lib/ai/actions';
@@ -17,6 +19,7 @@ const genders = ['women', 'men'];
 
 export function AdvancedModePanel() {
   const { setIsGenerating, setGeneratedImageUrl, uploadedImage } = useCanvasStore();
+  const { credits, hasCredits, refreshCredits } = useCredits();
   const [customPrompt, setCustomPrompt] = useState('');
   const [negativePrompt, setNegativePrompt] = useState('');
   const [strength, setStrength] = useState(75);
@@ -69,6 +72,7 @@ export function AdvancedModePanel() {
 
       if (result.success && result.imageUrl) {
         setGeneratedImageUrl(result.imageUrl);
+        await refreshCredits();
       } else {
         setError(result.error || 'Generation failed');
         console.error('[Advanced Mode] Generation failed:', result.error);
@@ -190,16 +194,37 @@ export function AdvancedModePanel() {
         </div>
       )}
 
+      {/* Credits Warning */}
+      {!hasCredits && (
+        <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4">
+          <p className="mb-2 text-sm font-semibold text-yellow-300">⚠️ No Credits Available</p>
+          <p className="mb-3 text-xs text-gray-300">
+            You&apos;ve used all your credits. Purchase more to continue.
+          </p>
+          <Link href="/pricing">
+            <Button variant="primary" size="sm" fullWidth>
+              Buy Credits
+            </Button>
+          </Link>
+        </div>
+      )}
+
       {/* Generate Button */}
       <Button
         variant="primary"
         size="lg"
         fullWidth
         onClick={handleGenerate}
-        disabled={!uploadedImage}
+        disabled={!uploadedImage || !hasCredits}
       >
-        🚀 Generate Advanced
+        {hasCredits ? '🚀 Generate Advanced' : '⚠️ No Credits'}
       </Button>
+
+      {hasCredits && (
+        <p className="text-center text-xs text-gray-400">
+          {credits} credit{credits !== 1 ? 's' : ''} remaining
+        </p>
+      )}
     </div>
   );
 }
