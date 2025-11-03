@@ -10,6 +10,9 @@ import { uploadImageToStorage } from '@/lib/storage/upload';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { hasAvailableCredits, deductCredit } from '@/lib/credits/actions';
+import { checkRateLimit } from '@/lib/rate-limit/db';
+import { validatePrompt, validateNegativePrompt, sanitizePrompt } from '@/lib/validation/input';
+import { sanitizeError, logError } from '@/lib/utils/error';
 
 export interface GenerateOptions {
   prompt: string;
@@ -50,6 +53,24 @@ export async function generateAIImage(formData: FormData): Promise<GenerateResul
       return { success: false, error: 'No prompt provided' };
     }
 
+    // Validate prompt
+    const promptValidation = validatePrompt(prompt);
+    if (!promptValidation.valid) {
+      return { success: false, error: promptValidation.error };
+    }
+
+    // Validate negative prompt if provided
+    if (negativePrompt) {
+      const negativeValidation = validateNegativePrompt(negativePrompt);
+      if (!negativeValidation.valid) {
+        return { success: false, error: negativeValidation.error };
+      }
+    }
+
+    // Sanitize prompts
+    const sanitizedPrompt = sanitizePrompt(prompt);
+    const sanitizedNegativePrompt = negativePrompt ? sanitizePrompt(negativePrompt) : undefined;
+
     const supabase = await createClient();
 
     // Get current user (required for credit system)
@@ -62,6 +83,16 @@ export async function generateAIImage(formData: FormData): Promise<GenerateResul
     }
 
     const userId = user.id;
+
+    // Rate limiting check (10 generations per hour)
+    const rateLimit = await checkRateLimit(userId, { maxRequests: 10, windowMinutes: 60 });
+    if (!rateLimit.allowed) {
+      const resetMinutes = Math.ceil((rateLimit.resetAt.getTime() - Date.now()) / 60000);
+      return {
+        success: false,
+        error: `Rate limit exceeded. You can generate ${rateLimit.remaining} more images. Try again in ${resetMinutes} minutes.`,
+      };
+    }
 
     // Check if user has available credits
     const creditCheck = await hasAvailableCredits();
@@ -82,8 +113,8 @@ export async function generateAIImage(formData: FormData): Promise<GenerateResul
     // Step 2: Generate AI image using FAL.AI
     const generation = await generateImage({
       imageUrl: uploadResult.url,
-      prompt,
-      negativePrompt,
+      prompt: sanitizedPrompt,
+      negativePrompt: sanitizedNegativePrompt,
       strength,
       guidanceScale,
       numImages: 1,
@@ -175,10 +206,10 @@ export async function generateAIImage(formData: FormData): Promise<GenerateResul
       generationId,
     };
   } catch (error) {
-    console.error('[AI] Generation failed:', error);
+    logError('AI Generation', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Generation failed',
+      error: sanitizeError(error),
     };
   }
 }

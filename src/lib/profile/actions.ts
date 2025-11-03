@@ -100,9 +100,16 @@ export async function uploadAvatar(
       .single();
 
     if (profile?.avatar_url) {
-      const oldPath = profile.avatar_url.split('/').pop();
-      if (oldPath) {
-        await supabase.storage.from('avatars').remove([`avatars/${oldPath}`]);
+      try {
+        // Extract path from Supabase storage URL
+        const url = new URL(profile.avatar_url);
+        const pathMatch = url.pathname.match(/\/storage\/v1\/object\/public\/avatars\/(.+)$/);
+        if (pathMatch && pathMatch[1]) {
+          await supabase.storage.from('avatars').remove([pathMatch[1]]);
+        }
+      } catch (error) {
+        // Ignore deletion errors for old avatar
+        console.warn('[Profile] Failed to delete old avatar:', error);
       }
     }
 
@@ -140,8 +147,8 @@ export async function uploadAvatar(
 
 /**
  * Change user password
- * Note: Current password verification by re-login may cause session issues
- * TODO: Use proper password verification method after MVP
+ * Uses updateUser which requires current session
+ * More secure than re-authentication method
  */
 export async function changePassword(
   currentPassword: string,
@@ -158,10 +165,15 @@ export async function changePassword(
       return { success: false, error: 'Not authenticated' };
     }
 
-    // Verify current password by attempting sign in
-    // Note: This creates a new session but we immediately update password
-    // so the session remains valid
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    // Verify current password with a separate client
+    // This doesn't affect the main session
+    const { createClient: createBrowserClient } = await import('@supabase/supabase-js');
+    const verifyClient = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    const { error: signInError } = await verifyClient.auth.signInWithPassword({
       email: user.email,
       password: currentPassword,
     });
@@ -170,14 +182,14 @@ export async function changePassword(
       return { success: false, error: 'Current password is incorrect' };
     }
 
-    // Update password
+    // Update password using the original session
     const { error: updateError } = await supabase.auth.updateUser({
       password: newPassword,
     });
 
     if (updateError) {
       console.error('[Profile] Password change failed:', updateError);
-      return { success: false, error: updateError.message };
+      return { success: false, error: 'Failed to update password' };
     }
 
     return { success: true };
@@ -185,26 +197,35 @@ export async function changePassword(
     console.error('[Profile] Password change error:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to change password',
+      error: 'Failed to change password',
     };
   }
 }
 
 /**
  * Delete user account
- * TODO: Implement proper account deletion with service role key
- * Currently only signs out the user (MVP workaround)
- * Full deletion requires:
- * 1. API route with service role client
- * 2. Delete all user data (images, generations, profile)
- * 3. Delete storage files
- * 4. Finally delete auth user
+ * Calls API route that uses service role key for complete deletion
+ * GDPR compliant - deletes all user data and files
  */
 export async function deleteAccount(): Promise<{ success: boolean; error?: string }> {
   try {
-    // For MVP: Just sign out the user
-    // Admin deletion requires service role key which needs separate API route
-    console.warn('[Profile] Account deletion not fully implemented - signing out only');
+    // Call API route for admin deletion
+    const response = await fetch('/api/account/delete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      return {
+        success: false,
+        error: result.error || 'Failed to delete account',
+      };
+    }
+
     return { success: true };
   } catch (error) {
     console.error('[Profile] Account deletion error:', error);
